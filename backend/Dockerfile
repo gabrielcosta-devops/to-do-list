@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expor a porta usada pelo backend
-EXPOSE 3002
+EXPOSE 3000
 
 # Comando para iniciar o servidor
 CMD ["npm", "run", "start"]

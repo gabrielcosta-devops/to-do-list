@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ListItem, ListItemText, Divider } from "@mui/material";
+import { List, Divider } from "@mui/material";
 import TaskItem from "./TaskIten";
 
 const TaskList = ({ tasks }) => {

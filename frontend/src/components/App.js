@@ -7,10 +7,18 @@ function App() {
 
   // Função para buscar tarefas do backend
   const fetchTasks = async () => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/tasks`);
-    const data = await response.json();
-    setTasks(data);
-  };  
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/tasks`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    }
+  };
+  
 
   // Função para alternar o estado da tarefa (concluída ou não)
   const toggleTaskCompletion = (taskId) => {

@@ -9,7 +9,7 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=http://backend:3002/api
+      - REACT_APP_API_URL=http://backend:3000/api
     volumes:
       - ./frontend:/app
     networks:
@@ -27,8 +27,8 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DB_HOST=postgres  # Configuração do hostname do banco
-      - DB_PORT=5432      # Porta do banco de dados
+      - DB_HOST=postgres 
+      - DB_PORT=5432 
     networks:
       - to-do-list
 

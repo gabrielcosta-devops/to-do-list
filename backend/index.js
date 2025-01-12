@@ -9,7 +9,11 @@ const PORT = process.env.PORT || 3000;
 const userRoutes = require("./routes/users");
 const taskRoutes = require("./routes/tasks");
 
-app.use(cors());
+app.use(
+    cors({
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    }));  
 app.use(bodyParser.json());
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
