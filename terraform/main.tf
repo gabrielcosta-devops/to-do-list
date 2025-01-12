@@ -45,7 +45,7 @@ resource "docker_container" "backend" {
   image = "to-do-list_backend"
   ports {
     internal = 3000
-    external = 3001
+    external = 3002
   }
   networks_advanced {
     name = docker_network.to_do_list_network.name
