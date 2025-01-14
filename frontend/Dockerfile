@@ -1,20 +1,27 @@
-# Use a imagem oficial do Node.js
-FROM node:18
+# Usar uma imagem Node.js como base
+FROM node:18 AS build
 
-# Defina o diretório de trabalho
+# Diretório de trabalho
 WORKDIR /app
 
-# Copie os arquivos de dependências
+# Copiar arquivos do projeto
 COPY package*.json ./
 
-# Instale as dependências
+# Instalar dependências
 RUN npm install
 
-# Copie o código fonte para o diretório de trabalho
+# Copiar o restante do código
 COPY . .
 
-# Exponha a porta para o frontend
-EXPOSE 3000
+# Build do projeto
+RUN npm run build
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+# Servir os arquivos estáticos
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expor a porta do container
+EXPOSE 80
+
+# Comando padrão para rodar o Nginx
+CMD ["nginx", "-g", "daemon off;"]
