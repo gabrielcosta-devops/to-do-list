@@ -6,8 +6,23 @@ const Cadastro = () => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleCadastro = () => {
-    console.log(nome, email, senha);
+  const handleCadastro = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', },
+        body: JSON.stringify({ nome, email, senha }),
+      });
+      if (response.ok) {
+        console.log('Usuário cadastrado com sucesso:',
+          await response.json());
+      } else {
+        console.error('Erro ao cadastrar usuário:',
+          await response.json());
+      }
+    } catch (error) {
+      console.error('Erro ao cadastrar usuário:', error);
+    }
   };
 
   return (

@@ -1,65 +1,120 @@
-# terraform/main.tf
-
 terraform {
   required_providers {
     docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 2.0"  # ou qualquer versão desejada
+      source = "kreuzwerker/docker"
+      version = "2.25.0" 
     }
   }
 }
 
-provider "docker" {}
-
-resource "docker_network" "to_do_list_network" {
-  name = "to-do-list_network"
+provider "docker" {
+  host = "unix:///var/run/docker.sock"
 }
 
+# Rede Docker
+resource "docker_network" "todo_network" {
+  name = "todo_network"
+}
+
+# Volume para o PostgreSQL
 resource "docker_volume" "postgres_data" {
   name = "postgres_data"
 }
 
-resource "docker_container" "postgres" {
-  name  = "postgres"
-  image = "postgres:15"
+# Banco de Dados PostgreSQL
+resource "docker_container" "database" {
+  image = "postgres:15-alpine"
+  name  = "todo_database"
+
   env = [
     "POSTGRES_USER=${var.db_user}",
-    "POSTGRES_PASSWORD=${var.db_pass}",
-    "POSTGRES_DB=${var.db_name}",
+    "POSTGRES_PASSWORD=${var.db_password}",
+    "POSTGRES_DB=${var.db_name}"
   ]
-  ports {
-    internal = 5432
-    external = 5432
+
+  mounts {
+    target = "/var/lib/postgresql/data"
+    source = docker_volume.postgres_data.name
+    type   = "volume"
   }
-  volumes {
-    host_path      = "/var/lib/postgresql/data"  # Caminho absoluto no sistema de arquivos do host
-    container_path = "/var/lib/postgresql/data"
-  }
+
   networks_advanced {
-    name = docker_network.to_do_list_network.name
+    name = docker_network.todo_network.name
+  }
+}
+
+# Backend
+resource "docker_image" "backend_image" {
+  name = "todo_backend"
+  build {
+    context    = "${path.module}/../backend"
+    dockerfile = "Dockerfile"
   }
 }
 
 resource "docker_container" "backend" {
-  name  = "to-do-list-backend"
-  image = "to-do-list_backend"
+  image = docker_image.backend_image.name
+  name  = "todo_backend"
+
+  env = [
+    "PORT=3001",
+    "DB_HOST=postgres",
+    "DB_NAME=${var.db_name}",
+    "DB_USER=${var.db_user}",
+    "DB_PASSWORD=${var.db_password}"
+  ]
+
   ports {
-    internal = 3000
-    external = 3002
+    internal = 3001
+    external = 3001
   }
+
+  depends_on = [docker_container.database]
+
   networks_advanced {
-    name = docker_network.to_do_list_network.name
+    name = docker_network.todo_network.name
+  }
+}
+
+# Frontend
+resource "docker_image" "frontend_image" {
+  name = "todo_frontend"
+  build {
+    context    = "${path.module}/../frontend"
+    dockerfile = "Dockerfile"
   }
 }
 
 resource "docker_container" "frontend" {
-  name  = "to-do-list-frontend"
-  image = "to-do-list_frontend"
+  image = docker_image.frontend_image.name
+  name  = "todo_frontend"
+
+  env = [
+    "REACT_APP_API_URL=http://localhost:3001/api"
+  ]
+
   ports {
     internal = 3000
     external = 3000
   }
+
+  depends_on = [docker_container.backend]
+
   networks_advanced {
-    name = docker_network.to_do_list_network.name
+    name = docker_network.todo_network.name
   }
 }
+
+# Executar docker-compose após o terraform apply
+#resource "null_resource" "start_docker_compose" {
+#  provisioner "local-exec" {
+#    command = "docker-compose -f ./docker-compose.yml up --build -d"
+#    working_dir = "${path.module}/.."
+#  }
+#
+#  depends_on = [
+#    docker_container.frontend,
+#    docker_container.backend,
+#    docker_container.database
+#  ]
+#}

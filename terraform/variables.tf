@@ -1,16 +1,14 @@
-# terraform/variables.tf
-
 variable "db_user" {
-  type    = string
-  default = "admin"
+  description = "Usuário do banco de dados"
+  sensitive   = true
 }
 
-variable "db_pass" {
-  type    = string
-  default = "admin123"
+variable "db_password" {
+  description = "Senha do banco de dados"
+  sensitive   = true
 }
 
 variable "db_name" {
-  type    = string
-  default = "todolist"
+  description = "Nome do banco de dados"
+  default     = "todo"
 }

@@ -1,2 +1,5 @@
 .env
-node_modules
+terraform.tfvars
+
+**/postgres-data
+node_modules/

@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Simular recuperação de usuário
       setUser({ email: 'user@example.com' });
     }
   }, []);
