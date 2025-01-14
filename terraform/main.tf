@@ -1,14 +1,30 @@
 terraform {
   required_providers {
     docker = {
-      source = "kreuzwerker/docker"
-      version = "2.25.0" 
+      source  = "kreuzwerker/docker"
+      version = "2.25.0"
     }
   }
 }
 
 provider "docker" {
   host = "unix:///var/run/docker.sock"
+}
+
+# Variáveis sensíveis
+variable "db_user" {
+  description = "Usuário do banco de dados"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Senha do banco de dados"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Nome do banco de dados"
+  type        = string
 }
 
 # Rede Docker
@@ -58,7 +74,7 @@ resource "docker_container" "backend" {
 
   env = [
     "PORT=3001",
-    "DB_HOST=postgres",
+    "DB_HOST=todo_database",
     "DB_NAME=${var.db_name}",
     "DB_USER=${var.db_user}",
     "DB_PASSWORD=${var.db_password}"
@@ -90,7 +106,7 @@ resource "docker_container" "frontend" {
   name  = "todo_frontend"
 
   env = [
-    "REACT_APP_API_URL=http://localhost:3001/api"
+    "REACT_APP_API_URL=http://todo_backend:3001/api"
   ]
 
   ports {
@@ -106,15 +122,15 @@ resource "docker_container" "frontend" {
 }
 
 # Executar docker-compose após o terraform apply
-#resource "null_resource" "start_docker_compose" {
-#  provisioner "local-exec" {
-#    command = "docker-compose -f ./docker-compose.yml up --build -d"
-#    working_dir = "${path.module}/.."
-#  }
-#
-#  depends_on = [
-#    docker_container.frontend,
-#    docker_container.backend,
-#    docker_container.database
-#  ]
-#}
+resource "null_resource" "start_docker_compose" {
+  provisioner "local-exec" {
+    command     = "docker-compose -f ./docker-compose.yml up --build -d"
+    working_dir = "${path.module}/.."
+  }
+
+  depends_on = [
+    docker_container.frontend,
+    docker_container.backend,
+    docker_container.database
+  ]
+}

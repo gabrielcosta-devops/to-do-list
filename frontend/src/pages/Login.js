@@ -1,73 +1,44 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography } from '@mui/material';
+import { login } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        navigate('/tasks');
-      } else {
-        alert('Email ou senha inválidos');
-      }
-    } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      alert('Ocorreu um erro, tente novamente.');
+      const response = await login({ username, password });
+      localStorage.setItem('token', response.token);
+      console.log('Login bem-sucedido!');
+      setError('');
+      navigate('/tasks');
+    } catch (err) {
+      console.error(err);
+      setError('Login falhou. Verifique suas credenciais.');
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        backgroundColor: '#f5f5f5',
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        Login
-      </Typography>
-      <Box sx={{ width: 300 }}>
-        <TextField
-          label="Email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleLogin}
-        >
-          Entrar
-        </Button>
-      </Box>
-    </Box>
+    <div>
+      <h1>Login</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <input
+        type="text"
+        placeholder="Usuário"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Senha"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleLogin}>Login</button>
+    </div>
   );
 };
 

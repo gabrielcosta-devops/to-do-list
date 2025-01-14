@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   frontend:
     build:
@@ -6,12 +8,17 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    env_file:
+      - ./.env
     environment:
-      - REACT_APP_API_URL=http://backend:3000/api
-    volumes:
-      - ./frontend:/app
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
     networks:
       - to-do-list
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   backend:
     build:
@@ -22,27 +29,30 @@ services:
       - ./.env
     depends_on:
       - postgres
-    volumes:
-      - ./backend:/app
-    environment:
-      - DB_HOST=postgres 
-      - DB_PORT=5432 
     networks:
       - to-do-list
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   postgres:
     image: postgres:15
     container_name: postgres
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
     networks:
       - to-do-list
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   postgres_data:

@@ -1,78 +1,49 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography } from '@mui/material';
+import { register } from '../api';
+import { useNavigate } from 'react-router-dom';
 
-const Cadastro = () => {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+const Register = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
-  const handleCadastro = async () => {
+  const handleRegister = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', },
-        body: JSON.stringify({ nome, email, senha }),
-      });
-      if (response.ok) {
-        console.log('Usuário cadastrado com sucesso:',
-          await response.json());
-      } else {
-        console.error('Erro ao cadastrar usuário:',
-          await response.json());
-      }
-    } catch (error) {
-      console.error('Erro ao cadastrar usuário:', error);
+      await register({ username, password });
+      setSuccess('Cadastro realizado com sucesso! Redirecionando...');
+      setError('');
+      setUsername('');
+      setPassword('');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err) {
+      console.error(err);
+      setError('Falha ao realizar o cadastro. Tente novamente.');
+      setSuccess('');
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        backgroundColor: '#f5f5f5',
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        Cadastro
-      </Typography>
-      <Box sx={{ width: 300 }}>
-        <TextField
-          label="Nome"
-          fullWidth
-          margin="normal"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
-        <TextField
-          label="Email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Senha"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleCadastro}
-        >
-          Registrar
-        </Button>
-      </Box>
-    </Box>
+    <div>
+      <h1>Cadastro</h1>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
+      <input
+        type="text"
+        placeholder="Usuário"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Senha"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleRegister}>Cadastrar</button>
+    </div>
   );
 };
 
-export default Cadastro;
+export default Register;

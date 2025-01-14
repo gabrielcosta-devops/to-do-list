@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const { Pool } = require('pg');
+const loginRoutes = require('./routes/login');
+const registerRoutes = require('./routes/register');
 
 const app = express();
 
@@ -29,60 +31,19 @@ pool.connect((err) => {
   }
 });
 
-// Endpoints básicos
-app.get('/', (req, res) => {
-  res.send('Bem-vindo à API do To-Do List!');
+// Rotas
+app.use('/api', loginRoutes);
+app.use('/api', registerRoutes);
+
+// Tratamento de erro 404
+app.use((req, res) => {
+  res.status(404).send('Rota não encontrada.');
 });
 
-// CRUD de tarefas
-app.get('/api/tasks', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM tasks');
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao buscar tarefas.');
-  }
-});
-
-app.post('/api/tasks', async (req, res) => {
-  const { title, description, status } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3) RETURNING *',
-      [title, description, status || 'pendente']
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao criar tarefa.');
-  }
-});
-
-app.put('/api/tasks/:id', async (req, res) => {
-  const { id } = req.params;
-  const { title, description, status } = req.body;
-  try {
-    const result = await pool.query(
-      'UPDATE tasks SET title = $1, description = $2, status = $3 WHERE id = $4 RETURNING *',
-      [title, description, status, id]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao atualizar tarefa.');
-  }
-});
-
-app.delete('/api/tasks/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
-    res.status(204).send();
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao excluir tarefa.');
-  }
+// Tratamento global de erros
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Ocorreu um erro interno no servidor.');
 });
 
 // Iniciar o servidor
