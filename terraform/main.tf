@@ -11,22 +11,6 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
-# Variáveis sensíveis
-variable "db_user" {
-  description = "Usuário do banco de dados"
-  type        = string
-}
-
-variable "db_password" {
-  description = "Senha do banco de dados"
-  type        = string
-}
-
-variable "db_name" {
-  description = "Nome do banco de dados"
-  type        = string
-}
-
 # Rede Docker
 resource "docker_network" "todo_network" {
   name = "todo_network"
@@ -48,20 +32,17 @@ resource "docker_container" "database" {
     "POSTGRES_DB=${var.db_name}"
   ]
 
-  mounts {
-    target = "/var/lib/postgresql/data"
-    source = docker_volume.postgres_data.name
-    type   = "volume"
+  volumes {
+    container_path = "/var/lib/postgresql/data"
+    volume_name    = docker_volume.postgres_data.name
   }
 
-  networks_advanced {
-    name = docker_network.todo_network.name
-  }
+  networks = [docker_network.todo_network.name]
 }
 
 # Backend
 resource "docker_image" "backend_image" {
-  name = "todo_backend"
+  name = "todo_backend_image"
   build {
     context    = "${path.module}/../backend"
     dockerfile = "Dockerfile"
@@ -87,14 +68,12 @@ resource "docker_container" "backend" {
 
   depends_on = [docker_container.database]
 
-  networks_advanced {
-    name = docker_network.todo_network.name
-  }
+  networks = [docker_network.todo_network.name]
 }
 
 # Frontend
 resource "docker_image" "frontend_image" {
-  name = "todo_frontend"
+  name = "todo_frontend_image"
   build {
     context    = "${path.module}/../frontend"
     dockerfile = "Dockerfile"
@@ -106,7 +85,7 @@ resource "docker_container" "frontend" {
   name  = "todo_frontend"
 
   env = [
-    "REACT_APP_API_URL=http://todo_backend:3001/api"
+    "REACT_APP_API_URL=http://localhost:3001/api"
   ]
 
   ports {
@@ -116,21 +95,19 @@ resource "docker_container" "frontend" {
 
   depends_on = [docker_container.backend]
 
-  networks_advanced {
-    name = docker_network.todo_network.name
-  }
+  networks = [docker_network.todo_network.name]
 }
 
 # Executar docker-compose após o terraform apply
-resource "null_resource" "start_docker_compose" {
-  provisioner "local-exec" {
-    command     = "docker-compose -f ./docker-compose.yml up --build -d"
-    working_dir = "${path.module}/.."
-  }
-
-  depends_on = [
-    docker_container.frontend,
-    docker_container.backend,
-    docker_container.database
-  ]
-}
+#resource "null_resource" "start_docker_compose" {
+#  provisioner "local-exec" {
+#    command     = "docker-compose -f ../docker-compose.yml up --build -d"
+#    working_dir = "${path.module}/.."
+#  }
+#
+#  depends_on = [
+#    docker_container.frontend,
+#    docker_container.backend,
+#    docker_container.database
+#  ]
+#}

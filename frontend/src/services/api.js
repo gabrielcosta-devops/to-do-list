@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -16,32 +16,32 @@ api.interceptors.request.use((config) => {
 });
 
 export const login = async (credentials) => {
-  const response = await api.post('/api/login', credentials);
+  const response = await api.post('/login', credentials);
   return response.data;
 };
 
 export const register = async (userData) => {
-  const response = await api.post('/api/register', userData);
+  const response = await api.post('/register', userData);
   return response.data;
 };
 
 export const getTasks = async () => {
-  const response = await api.get('/api/tasks');
+  const response = await api.get('/tasks');
   return response.data;
 };
 
 export const createTask = async (task) => {
-  const response = await api.post('/api/tasks', task);
+  const response = await api.post('/tasks', task);
   return response.data;
 };
 
 export const updateTask = async (id, updatedTask) => {
-  const response = await api.put(`/api/tasks/${id}`, updatedTask);
+  const response = await api.put(`/tasks/${id}`, updatedTask);
   return response.data;
 };
 
 export const deleteTask = async (id) => {
-  await api.delete(`/api/tasks/${id}`);
+  await api.delete(`/tasks/${id}`);
 };
 
 export default api;

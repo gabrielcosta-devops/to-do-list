@@ -22,7 +22,7 @@ provider "registry.terraform.io/hashicorp/null" {
 
 provider "registry.terraform.io/kreuzwerker/docker" {
   version     = "2.25.0"
-  constraints = "~> 2.0"
+  constraints = "2.25.0"
   hashes = [
     "h1:nB2atWOMNrq3tfVH216oFFCQ/TNjAXXno6ZyZhlGdQs=",
     "zh:02ca00d987b2e56195d2e97d82349f680d4b94a6a0d514dc6c0031317aec4f11",
