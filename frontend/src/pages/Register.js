@@ -7,7 +7,6 @@ const Cadastro = () => {
   const [senha, setSenha] = useState('');
 
   const handleCadastro = () => {
-    // Lógica para cadastro (chamada à API)
     console.log(nome, email, senha);
   };
 
