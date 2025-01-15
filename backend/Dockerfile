@@ -1,7 +1,6 @@
-# Use a imagem base do Node.js
 FROM node:18-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src
 
 COPY package*.json ./
 

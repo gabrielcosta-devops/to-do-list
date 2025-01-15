@@ -3,8 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const { Pool } = require('pg');
-const loginRoutes = require('./routes/login');
-const registerRoutes = require('./routes/register');
+const loginRoutes = require('./src/routes/login');
+const registerRoutes = require('./src/routes/register');
 
 const app = express();
 
